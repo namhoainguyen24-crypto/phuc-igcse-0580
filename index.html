@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Phúc · Sổ liên lạc Phụ huynh &amp; Cổng học tập IGCSE 0580</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100dvh;
+    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+    background: #f8fafc;
+    color: #0f172a;
+  }
+  .pcp-bar {
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 12px;
+    background: #0f172a;
+    color: #f8fafc;
+    border-bottom: 1px solid #1e293b;
+  }
+  .pcp-left, .pcp-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .pcp-brand {
+    font: 700 13px/1 system-ui, -apple-system, sans-serif;
+    color: #e2e8f0;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+    margin-right: 4px;
+  }
+  .pcp-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #1e293b;
+    padding: 3px;
+    border-radius: 9px;
+    min-width: 0;
+  }
+  .pcp-tab {
+    border: 0;
+    background: transparent;
+    color: #cbd5e1;
+    padding: 6px 11px;
+    border-radius: 7px;
+    font: 600 12.5px/1.2 system-ui, -apple-system, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.14s ease, color 0.14s ease;
+  }
+  .pcp-tab:hover { color: #ffffff; background: rgba(255, 255, 255, 0.08); }
+  .pcp-tab.on {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.45);
+  }
+  .pcp-sync-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(22, 163, 74, 0.18);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    color: #86efac;
+    font: 600 11.5px/1 system-ui, -apple-system, sans-serif;
+    white-space: nowrap;
+  }
+  .pcp-refresh {
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 6px 10px;
+    border-radius: 7px;
+    font: 600 12px/1.1 system-ui, -apple-system, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.14s ease, border-color 0.14s ease;
+  }
+  .pcp-refresh:hover { background: #334155; color: #ffffff; }
+  #role-frame {
+    display: block;
+    width: 100%;
+    height: calc(100dvh - 46px);
+    border: 0;
+    background: #ffffff;
+  }
+  @media (max-width: 680px) {
+    .pcp-brand, .pcp-sync-pill { display: none; }
+    .pcp-bar { padding: 0 8px; gap: 6px; }
+    .pcp-left { flex: 1 1 auto; }
+    .pcp-tabs { width: 100%; }
+    .pcp-tab {
+      flex: 1 1 50%;
+      padding: 6px 6px;
+      font-size: 11.5px;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pcp-refresh { padding: 6px 8px; font-size: 11.5px; }
+  }
+</style>
+</head>
+<body>
+  <header class="pcp-bar">
+    <div class="pcp-left">
+      <span class="pcp-brand">📘 IGCSE 0580 · Phúc</span>
+      <nav class="pcp-tabs" role="tablist" aria-label="Chọn chế độ xem cho Phụ huynh hoặc Phúc">
+        <button type="button" class="pcp-tab on" data-tab="ph" role="tab" aria-selected="true">👨‍👩‍👦 Phụ huynh · Sổ liên lạc</button>
+        <button type="button" class="pcp-tab" data-tab="hs" role="tab" aria-selected="false">🎒 Phúc · Học bài &amp; BTVN</button>
+      </nav>
+    </div>
+    <div class="pcp-right">
+      <span class="pcp-sync-pill" id="sync-pill">🟢 Đã đồng bộ</span>
+      <button type="button" class="pcp-refresh" id="btn-refresh" title="Tải cập nhật mới nhất từ thầy giáo">🔄 Làm mới</button>
+    </div>
+  </header>
+  <iframe id="role-frame" title="Cổng học tập &amp; Sổ liên lạc Phúc" src="ph.html?embed=1&amp;v=gv52&amp;hs=stu_phuc"></iframe>
+<script>
+(function () {
+  'use strict';
+  const BUILD_TAG = 'gv52';
+  const frame = document.getElementById('role-frame');
+  const tabs = Array.from(document.querySelectorAll('.pcp-tab[data-tab]'));
+  const syncPill = document.getElementById('sync-pill');
+  const btnRefresh = document.getElementById('btn-refresh');
+
+  function _initialTab() {
+    try {
+      const hash = String(location.hash || '').replace(/^#/, '').trim().toLowerCase();
+      if (hash === 'hs' || hash === 'ph') return hash;
+      const qp = new URLSearchParams(location.search || '');
+      const v = String(qp.get('view') || qp.get('role') || '').trim().toLowerCase();
+      if (v === 'hs' || v === 'ph') return v;
+    } catch (_) {}
+    return 'ph';
+  }
+
+  function _srcForTab(tab) {
+    const file = tab === 'hs' ? 'hs.html' : 'ph.html';
+    return file + '?embed=1&v=' + encodeURIComponent(BUILD_TAG) + '&hs=stu_phuc';
+  }
+
+  let _curTab = _initialTab();
+  let _manualWaitTimer = null;
+
+  function _setTab(tab, updateHash) {
+    _curTab = tab === 'hs' ? 'hs' : 'ph';
+    tabs.forEach(function (b) {
+      const on = b.getAttribute('data-tab') === _curTab;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    const nextSrc = _srcForTab(_curTab);
+    if (frame.getAttribute('src') !== nextSrc) {
+      frame.setAttribute('src', nextSrc);
+    }
+    if (updateHash) {
+      try { history.replaceState(null, '', '#' + _curTab); } catch (_) {}
+    }
+  }
+
+  function _fmtClock(ms) {
+    if (!ms) return '';
+    try {
+      const d = new Date(Number(ms));
+      if (isNaN(d.getTime())) return '';
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return hh + ':' + mm;
+    } catch (_) {
+      return '';
+    }
+  }
+
+  tabs.forEach(function (b) {
+    b.addEventListener('click', function () {
+      _setTab(b.getAttribute('data-tab') || 'ph', true);
+    });
+  });
+
+  if (btnRefresh) {
+    btnRefresh.addEventListener('click', function () {
+      btnRefresh.textContent = '⏳ Đang tải...';
+      try {
+        if (frame && frame.contentWindow) {
+          frame.contentWindow.postMessage({ type: 'force-cloud-pull' }, '*');
+        }
+      } catch (_) {}
+      if (_manualWaitTimer) clearTimeout(_manualWaitTimer);
+      _manualWaitTimer = setTimeout(function () {
+        btnRefresh.textContent = '✓ Mới nhất';
+        setTimeout(function () {
+          btnRefresh.textContent = '🔄 Làm mới';
+        }, 1800);
+      }, 900);
+    });
+  }
+
+  window.addEventListener('message', function (ev) {
+    const d = ev && ev.data;
+    if (!d || d.type !== 'phuc-cloud-synced') return;
+    const hm = _fmtClock(d.updatedAt);
+    if (syncPill) {
+      syncPill.textContent = hm ? ('🟢 Cập nhật ' + hm) : '🟢 Đã đồng bộ';
+    }
+    if (btnRefresh && btnRefresh.textContent.indexOf('Đang tải') !== -1) {
+      if (_manualWaitTimer) clearTimeout(_manualWaitTimer);
+      btnRefresh.textContent = '✓ Mới nhất';
+      setTimeout(function () {
+        btnRefresh.textContent = '🔄 Làm mới';
+      }, 1800);
+    }
+  });
+
+  window.addEventListener('hashchange', function () {
+    const t = _initialTab();
+    if (t !== _curTab) _setTab(t, false);
+  });
+
+  _setTab(_curTab, false);
+})();
+</script>
+</body>
+</html>
