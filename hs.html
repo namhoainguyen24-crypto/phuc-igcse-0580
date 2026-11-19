@@ -7,21 +7,13 @@
   if (window.__v2CloudSyncShimInstalled) return;
   window.__v2CloudSyncShimInstalled = true;
 
-  const GH_API_URL = 'https://api.github.com/repos/namhoainguyen24-crypto/phuc-igcse-0580/contents/sync_state.json?ref=main';
+  const GH_RAW_URL = 'https://raw.githubusercontent.com/namhoainguyen24-crypto/phuc-igcse-0580/main/sync_state.json';
   const origFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
 
   let _cachedSyncObj = null;
   let _lastLocalFetchMs = 0;
   let _lastGhApiFetchMs = 0;
   let _inFlightPull = null;
-
-  function _decodeGhBase64Utf8(b64) {
-    const clean = String(b64 || '').replace(/\s+/g, '');
-    const bin = atob(clean);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return new TextDecoder('utf-8').decode(bytes);
-  }
 
   function _notifyParent(obj) {
     try {
@@ -82,17 +74,10 @@
         if (shouldHitGhApi) {
           _lastGhApiFetchMs = Date.now();
           try {
-            const resGh = await origFetch(GH_API_URL + '&_t=' + Date.now(), {
-              cache: 'no-store',
-              headers: { 'Accept': 'application/vnd.github+json' },
-            });
+            const resGh = await origFetch(GH_RAW_URL + '?_t=' + Date.now(), { cache: 'no-store' });
             if (resGh && resGh.ok) {
-              const meta = await resGh.json();
-              if (meta && meta.content) {
-                const decoded = _decodeGhBase64Utf8(meta.content);
-                const parsedGh = JSON.parse(decoded);
-                if (parsedGh && parsedGh.ok) ghObj = parsedGh;
-              }
+              const parsedGh = await resGh.json();
+              if (parsedGh && parsedGh.ok) ghObj = parsedGh;
             }
           } catch (_) {}
         }
